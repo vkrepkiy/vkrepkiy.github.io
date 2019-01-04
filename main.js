@@ -422,6 +422,12 @@ __webpack_require__.r(__webpack_exports__);
 
 var T_CHRISTMASTREE = 'assets/sprites/christmastree.png';
 var T_ROOM = 'assets/sprites/room.jpg';
+var T_BALLOON = 'assets/sprites/balloon.png';
+var BALLOONS_MAX = 10;
+var BALLOON_SPAWN_TIME = 500;
+var BALLOON_HEIGHT = 70;
+var BALLOONS_SCREEN_SHIFT = BALLOON_HEIGHT;
+var BALLOON_SPEED = 2;
 var Sprite = /** @class */ (function (_super) {
     tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"](Sprite, _super);
     function Sprite() {
@@ -451,7 +457,8 @@ var PixiComponent = /** @class */ (function () {
         this._texturesReady$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["BehaviorSubject"](false);
         this._loadTextures([
             T_CHRISTMASTREE,
-            T_ROOM
+            T_ROOM,
+            T_BALLOON
         ]);
         Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["forkJoin"])(this._domReady$.pipe(Object(src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__["isTrue"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1)), this._texturesReady$.pipe(Object(src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__["isTrue"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1))).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function () { return _this._setup(); });
     }
@@ -460,11 +467,57 @@ var PixiComponent = /** @class */ (function () {
         this._destroy$.complete();
     };
     PixiComponent.prototype.ngOnInit = function () {
-        var _this = this;
         this._renderer.appendChild(this._hostRef.nativeElement, this._pixiApp.view);
         this._onResize();
         this._domReady$.next(true);
-        this._texturesReady$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["filter"])(function (ready) { return ready === true; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1)).subscribe(function () { return _this._setup(); });
+    };
+    PixiComponent.prototype._applyBalloonsBehavior = function (container) {
+        var _this = this;
+        var spawnTimestamp = Date.now() - BALLOON_SPAWN_TIME;
+        return function (d) {
+            var balloons = container.children;
+            // Destroy invisible balloons
+            container.children.forEach(function (balloon, i) {
+                balloon.y -= BALLOON_SPEED;
+                if (BALLOON_HEIGHT < balloon.getGlobalPosition().y * -1) {
+                    container.removeChild(balloon);
+                    balloon.destroy();
+                }
+            });
+            if (container.children.length >= BALLOONS_MAX) {
+                return;
+            }
+            if (BALLOON_SPAWN_TIME > (Date.now() - spawnTimestamp)) {
+                return;
+            }
+            var size = _this._getContainerSize();
+            var newBalloon = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Sprite"](_this._getTexture(T_BALLOON));
+            var balloonProportions = newBalloon.height / newBalloon.width;
+            newBalloon.height = BALLOON_HEIGHT;
+            newBalloon.width = BALLOON_HEIGHT / balloonProportions;
+            newBalloon.x = Math.round(Math.random() * (size.width - newBalloon.width));
+            newBalloon.y = size.height;
+            _this._applyTouchBehaviour(newBalloon, function (balloon) {
+                newBalloon.destroy();
+            });
+            container.addChild(newBalloon);
+            spawnTimestamp = Date.now();
+        };
+    };
+    PixiComponent.prototype._applyTouchBehaviour = function (object, cb) {
+        function fireCb(e) {
+            cb(e.target, e);
+        }
+        object.interactive = true;
+        object.on('pointerdown', fireCb);
+        object.once('removed', function () { return object.off('pointerdown', fireCb); });
+    };
+    PixiComponent.prototype._applyVelocity = function (objects, delta) {
+        var _this = this;
+        objects.forEach(function (o) {
+            o.x = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.x + o.vx, [0, _this._pixiApp.view.width]);
+            o.y = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.y + o.vy, [0, _this._pixiApp.view.height]);
+        });
     };
     PixiComponent.prototype._getContainerSize = function () {
         var el = this._hostRef.nativeElement;
@@ -526,37 +579,33 @@ var PixiComponent = /** @class */ (function () {
         this._resize$.next(size);
     };
     PixiComponent.prototype._setup = function () {
-        var _this = this;
         var containerSize = this._getContainerSize();
         var spriteChristmasTree = new Sprite(this._getTexture(T_CHRISTMASTREE));
+        var spriteRoom = new Sprite(this._getTexture(T_ROOM));
+        var balloons = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Container"]();
         spriteChristmasTree.anchor.x = 0.5;
         spriteChristmasTree.anchor.y = 0.5;
-        spriteChristmasTree.position = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Point"](containerSize.width / 2, containerSize.height / 1.5);
-        var spriteRoom = new Sprite(this._getTexture(T_ROOM));
         spriteRoom.anchor.x = 0.5;
-        spriteRoom.position = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Point"](containerSize.width / 2, 0);
         this._resize$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["startWith"])(this._getContainerSize()), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function (size) {
             var treeProportions = spriteChristmasTree.height / spriteChristmasTree.width;
-            var roomProportions = spriteRoom.height / spriteRoom.width;
             var treeHeight = spriteChristmasTree.height = size.height / 2;
-            spriteChristmasTree.width = Math.round(treeHeight / treeProportions);
+            var roomProportions = spriteRoom.height / spriteRoom.width;
             var roomHeight = spriteRoom.height = size.height;
+            spriteChristmasTree.width = Math.round(treeHeight / treeProportions);
+            spriteChristmasTree.position.set(containerSize.width / 2, containerSize.height / 1.5);
             spriteRoom.width = Math.round(roomHeight / roomProportions);
             spriteRoom.position.set(size.width / 2, 0);
         });
-        this._keyEvent$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function (e) { return _this._handleKeyEvent(e, spriteChristmasTree); });
+        // this._keyEvent$.pipe(
+        //   takeUntil(this._destroy$)
+        // ).subscribe(e => this._handleKeyEvent(e, spriteChristmasTree));
         this._pixiApp.stage.addChild(spriteRoom);
         this._pixiApp.stage.addChild(spriteChristmasTree);
+        this._pixiApp.stage.addChild(balloons);
         this._pixiApp.ticker.add(this._applyVelocity.bind(this, [
             spriteChristmasTree
         ]));
-    };
-    PixiComponent.prototype._applyVelocity = function (objects, delta) {
-        var _this = this;
-        objects.forEach(function (o) {
-            o.x = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.x + o.vx, [0, _this._pixiApp.view.width]);
-            o.y = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.y + o.vy, [0, _this._pixiApp.view.height]);
-        });
+        this._pixiApp.ticker.add(this._applyBalloonsBehavior(balloons));
     };
     tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["HostListener"])('window:resize', ['$event']),
