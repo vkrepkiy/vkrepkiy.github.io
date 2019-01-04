@@ -45,10 +45,10 @@ var routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'newyear2018'
+        redirectTo: 'newyear'
     },
     {
-        path: 'newyear2018',
+        path: 'newyear',
         component: _newyear_newyear_component__WEBPACK_IMPORTED_MODULE_3__["NYPageComponent"]
     },
     {
@@ -412,6 +412,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
 /* harmony import */ var src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/utils/rxjs */ "./src/utils/rxjs.ts");
+/* harmony import */ var src_utils_number__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/utils/number */ "./src/utils/number.ts");
+
 
 
 
@@ -419,6 +421,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var T_CHRISTMASTREE = 'assets/sprites/christmastree.png';
+var T_ROOM = 'assets/sprites/room.jpg';
+var Sprite = /** @class */ (function (_super) {
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"](Sprite, _super);
+    function Sprite() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.vx = 0;
+        _this.vy = 0;
+        return _this;
+    }
+    return Sprite;
+}(pixi_js__WEBPACK_IMPORTED_MODULE_2__["Sprite"]));
 var PixiComponent = /** @class */ (function () {
     function PixiComponent(_hostRef, _renderer) {
         var _this = this;
@@ -427,13 +440,18 @@ var PixiComponent = /** @class */ (function () {
         this.loaderProgress$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["Subject"];
         this._destroy$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["Subject"];
         this._domReady$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["BehaviorSubject"](false);
+        this._keydown$ = Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["fromEvent"])(document, 'keydown');
+        this._keyup$ = Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["fromEvent"])(document, 'keyup');
+        this._keyEvent$ = Object(src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__["use"])(function () { return Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["merge"])(_this._keydown$, _this._keyup$); });
         this._pixiApp = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Application"]({
+            antialias: true,
             transparent: true
         });
         this._resize$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["Subject"];
         this._texturesReady$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["BehaviorSubject"](false);
         this._loadTextures([
-            T_CHRISTMASTREE
+            T_CHRISTMASTREE,
+            T_ROOM
         ]);
         Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["forkJoin"])(this._domReady$.pipe(Object(src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__["isTrue"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1)), this._texturesReady$.pipe(Object(src_utils_rxjs__WEBPACK_IMPORTED_MODULE_5__["isTrue"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1))).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["take"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function () { return _this._setup(); });
     }
@@ -458,6 +476,38 @@ var PixiComponent = /** @class */ (function () {
     PixiComponent.prototype._getTexture = function (key) {
         return pixi_js__WEBPACK_IMPORTED_MODULE_2__["loader"].resources[key].texture;
     };
+    PixiComponent.prototype._handleKeyEvent = function (e, sprite) {
+        var pressed = e.type === 'keydown';
+        var accelerate = pressed && e.repeat;
+        e.preventDefault();
+        e.stopPropagation();
+        switch (e.key) {
+            case 'ArrowDown':
+                sprite.vy = pressed ? sprite.vy || 1 : 0;
+                if (accelerate) {
+                    sprite.vy += 1;
+                }
+                break;
+            case 'ArrowUp':
+                sprite.vy = pressed ? sprite.vy || -1 : 0;
+                if (accelerate) {
+                    sprite.vy -= 1;
+                }
+                break;
+            case 'ArrowLeft':
+                sprite.vx = pressed ? sprite.vx || -1 : 0;
+                if (accelerate) {
+                    sprite.vx -= 1;
+                }
+                break;
+            case 'ArrowRight':
+                sprite.vx = (pressed ? sprite.vx || 1 : 0);
+                if (accelerate) {
+                    sprite.vx += 1;
+                }
+                break;
+        }
+    };
     PixiComponent.prototype._loadTextures = function () {
         var _this = this;
         var loaderParams = [];
@@ -476,16 +526,37 @@ var PixiComponent = /** @class */ (function () {
         this._resize$.next(size);
     };
     PixiComponent.prototype._setup = function () {
-        var spriteChristmasTree = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Sprite"](this._getTexture(T_CHRISTMASTREE));
+        var _this = this;
+        var containerSize = this._getContainerSize();
+        var spriteChristmasTree = new Sprite(this._getTexture(T_CHRISTMASTREE));
         spriteChristmasTree.anchor.x = 0.5;
         spriteChristmasTree.anchor.y = 0.5;
-        this._resize$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["debounceTime"])(20), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["startWith"])(this._getContainerSize()), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function (size) {
-            var proportions = spriteChristmasTree.height / spriteChristmasTree.width;
-            spriteChristmasTree.position = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Point"](size.width / 2, size.height / 2);
-            spriteChristmasTree.height = size.height;
-            spriteChristmasTree.width = Math.round(size.height / proportions);
+        spriteChristmasTree.position = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Point"](containerSize.width / 2, containerSize.height / 1.5);
+        var spriteRoom = new Sprite(this._getTexture(T_ROOM));
+        spriteRoom.anchor.x = 0.5;
+        spriteRoom.position = new pixi_js__WEBPACK_IMPORTED_MODULE_2__["Point"](containerSize.width / 2, 0);
+        this._resize$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["startWith"])(this._getContainerSize()), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function (size) {
+            var treeProportions = spriteChristmasTree.height / spriteChristmasTree.width;
+            var roomProportions = spriteRoom.height / spriteRoom.width;
+            var treeHeight = spriteChristmasTree.height = size.height / 2;
+            spriteChristmasTree.width = Math.round(treeHeight / treeProportions);
+            var roomHeight = spriteRoom.height = size.height;
+            spriteRoom.width = Math.round(roomHeight / roomProportions);
+            spriteRoom.position.set(size.width / 2, 0);
         });
+        this._keyEvent$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["takeUntil"])(this._destroy$)).subscribe(function (e) { return _this._handleKeyEvent(e, spriteChristmasTree); });
+        this._pixiApp.stage.addChild(spriteRoom);
         this._pixiApp.stage.addChild(spriteChristmasTree);
+        this._pixiApp.ticker.add(this._applyVelocity.bind(this, [
+            spriteChristmasTree
+        ]));
+    };
+    PixiComponent.prototype._applyVelocity = function (objects, delta) {
+        var _this = this;
+        objects.forEach(function (o) {
+            o.x = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.x + o.vx, [0, _this._pixiApp.view.width]);
+            o.y = Object(src_utils_number__WEBPACK_IMPORTED_MODULE_6__["limitNumber"])(o.y + o.vy, [0, _this._pixiApp.view.height]);
+        });
     };
     tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["HostListener"])('window:resize', ['$event']),
@@ -644,20 +715,52 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 
 /***/ }),
 
+/***/ "./src/utils/number.ts":
+/*!*****************************!*\
+  !*** ./src/utils/number.ts ***!
+  \*****************************/
+/*! exports provided: limitNumber */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "limitNumber", function() { return limitNumber; });
+function limitNumber(number, _a) {
+    var min = _a[0], max = _a[1];
+    if (number > max) {
+        return max;
+    }
+    else if (number < min) {
+        return min;
+    }
+    else {
+        return number;
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/utils/rxjs.ts":
 /*!***************************!*\
   !*** ./src/utils/rxjs.ts ***!
   \***************************/
-/*! exports provided: isTrue */
+/*! exports provided: isTrue, use */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isTrue", function() { return isTrue; });
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "use", function() { return use; });
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+
 
 function isTrue() {
-    return Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_0__["filter"])(function (x) { return x === true; });
+    return Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["filter"])(function (x) { return x === true; });
+}
+function use(fn) {
+    return Object(rxjs__WEBPACK_IMPORTED_MODULE_0__["of"])(null).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["switchMap"])(fn));
 }
 
 
