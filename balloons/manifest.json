@@ -1,11 +1,12 @@
 {
+  "lang": "en-US",
   "name": "Balloons! Free game for kids, no ads, no payments.",
   "short_name": "Balloons!",
   "theme_color": "#212121",
   "background_color": "#212121",
-  "display": "standalone",
+  "display": "fullscreen",
   "scope": "/balloons",
-  "start_url": "/balloons",
+  "start_url": "/balloons/",
   "icons": [
     {
       "src": "assets/icons/icon-72x72.png",

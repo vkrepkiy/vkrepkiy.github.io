@@ -31,4 +31,4 @@ self.addEventListener('message', (event) => {
 self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerRoute("/", new workbox.strategies.NetworkFirst(), 'GET');
+workbox.routing.registerRoute("/balloons", new workbox.strategies.NetworkFirst(), 'GET');
