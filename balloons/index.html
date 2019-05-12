@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="theme-color" content="#212121" />
-    <meta name="description" content="Free and safe game for kids, no ads, no payments." />
+    <meta
+      name="description"
+      content="Free and safe game for kids, no ads, no payments."
+    />
     <title>Balloons! Free game for kids, no ads, no payments.</title>
     <style>
       html {
@@ -12,18 +15,21 @@
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="manifest" href="manifest.json" />
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker
+            .register("service-worker.js")
+            .then(console.log)
+            .catch(console.error);
+        });
+      }
+    </script>
   </head>
   <body>
     <noscript>
       Please, enable JavaScript to run this app.
     </noscript>
-    <script defer>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('service-worker.js').catch(e => console.error(e));
-        });
-      }
-    </script>
-    <script async type="text/javascript" src="main.js"></script>
-  <script type="text/javascript" src="main.js"></script></body>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
 </html>
