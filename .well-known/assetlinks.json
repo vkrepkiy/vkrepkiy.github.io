@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.vkrepkiy.balloons",
-      "sha256_cert_fingerprints": ["hash_of_app_certificate"]
+      "sha256_cert_fingerprints": [
+        "75:9D:20:74:7B:C0:60:30:0A:8B:80:34:DD:9C:B5:88:43:0F:BD:43:99:02:BB:41:E3:10:A5:A1:AD:65:47:F1"
+      ]
     }
   }
 ]
