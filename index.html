@@ -1,1 +1,77 @@
-<!DOCTYPE html><html lang="en">  <head>    <meta charset="UTF-8" />    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <meta http-equiv="X-UA-Compatible" content="ie=edge" />    <title></title>    <style>      html,      body,      #app {        width: 100%;        height: 100%;        margin: 0;        padding: 0;        overflow: hidden;        background-color: #212121;      }    </style>    <script type="text/javascript">      (function(w) {        let url = w.sessionStorage.getItem('vkredirect');        w.sessionStorage.removeItem('vkredirect');        if (url && url != w.location.href) {          w.history.replaceState(null, null, url);        }      })(window);    </script>  </head>  <body>    <vk-app id="app"></vk-app>  <script type="text/javascript" src="main.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base href="/" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Personal web page. Valentin Krepkiy - software engineer, app developer"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" type="text/css" href="theme.css" />
+    <link rel="manifest" href="manifest.json" />
+    <title>krepkiy.dev</title>
+    <style>
+      html,
+      body,
+      vk-app {
+        margin: 0;
+        min-width: 100%;
+        min-height: 100%;
+        position: relative;
+        display: flex;
+        background: var(--background-color, #212121);
+        color: var(--text-color, #999);
+        font-family: var(--font-family, monospace);
+        font-size: var(--font-size, 1.1em);
+        line-height: var(--line-height, 1.6em);
+      }
+
+      /* Use default font size for narrow screens */
+      @media (max-width: 600px) {
+        :root {
+          --font-size: 1rem;
+        }
+      }
+
+      /* Use default font size for wide screens */
+      @media (min-width: 1200px) {
+        :root {
+          --font-size: 1.2rem;
+        }
+      }
+
+      .loading-title {
+        display: block;
+        margin: auto;
+        text-shadow: var(--text-shadow-color, #000) 0px 0px 1px;
+        font-weight: normal;
+        padding: 0 5px;
+        position: relative;
+      }
+      .loading-title sub {
+        color: var(--header-sub-color, #5d5d5d);
+        font-size: 0.6em;
+      }
+
+      /* .loading-title:before {
+        content: "";
+        width: 3px;
+        height: 3px;
+        display: block;
+        background: green;
+        border-radius: 50%;
+        position: absolute;
+        left: -5px;
+        box-shadow: #006b00 0px 0px 4px;
+      } */
+    </style>
+  </head>
+  <body>
+    <vk-app>
+      <h1 class="loading-title">v.krepkiy<sub>.cloud</sub></h1>
+    </vk-app>
+    <script async type="module" src="app.bundle.js"></script>
+  </body>
+</html>

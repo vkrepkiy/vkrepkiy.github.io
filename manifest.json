@@ -1,0 +1,8 @@
+{
+  "name": "krepkiy.dev",
+  "short_name": "krepkiy.dev",
+  "theme_color": "rgba(19,19,19,0.87)",
+  "background_color": "#505050",
+  "display": "standalone",
+  "start_url": "/"
+}
