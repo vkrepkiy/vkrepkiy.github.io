@@ -1,1 +1,1 @@
-include: ['.well-known', 'balloons']
+include: [".well-known"]
